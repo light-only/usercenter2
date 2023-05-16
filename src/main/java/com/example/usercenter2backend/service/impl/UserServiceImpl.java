@@ -9,12 +9,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.example.usercenter2backend.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
 * @author Z
@@ -28,7 +29,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Resource UserMapper userMapper;
 
+    /**
+     * 盐值，混淆密码
+     */
     private static final String SALT = "yupi";
+
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
@@ -106,7 +111,37 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             log.info("user login faild,userAcoount cannot match userPassword");
             return null;
         }
-        return null;
+
+        //用户脱敏  脱敏就是不能返回所有的信息，比如密码，只返回可以展示出来的信息，比如账号，头像等。
+        User safeUser = getSafeUser(user);
+
+        //记录用户的登录状态 ->通过这个来判断用户是否登录
+        request.getSession().setAttribute(USER_LOGIN_STATE,safeUser);
+        return safeUser;
+    }
+
+    /**
+     * 返回脱敏后的用户信息
+     * @param user
+     * @return
+     */
+    @Override
+    public User getSafeUser(User user) {
+        User safeUser = new User();
+        safeUser.setId(user.getId());
+        safeUser.setUserName(user.getUserName());
+        safeUser.setUserAccount(user.getUserAccount());
+        safeUser.setAvatarUrl(user.getAvatarUrl());
+        safeUser.setGender(user.getGender());
+        safeUser.setEmail(user.getEmail());
+        safeUser.setUserStatus(user.getUserStatus());
+        safeUser.setPhone(user.getPhone());
+        safeUser.setCreateTime(user.getCreateTime());
+        safeUser.setUserRole(user.getUserRole());
+        safeUser.setPlanetCode(user.getPlanetCode());
+        safeUser.setTags(user.getTags());
+        safeUser.setProfile(user.getProfile());
+        return safeUser;
     }
 }
 
