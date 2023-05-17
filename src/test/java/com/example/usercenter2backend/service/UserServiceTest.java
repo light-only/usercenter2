@@ -1,8 +1,6 @@
 package com.example.usercenter2backend.service;
-import java.util.Date;
 
 import com.example.usercenter2backend.model.domain.User;
-import org.apache.logging.log4j.message.ReusableMessage;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
@@ -10,8 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * 用户服务测试
@@ -46,34 +42,35 @@ public class UserServiceTest {
         String userAccount = "yupi";
         String userPassword = "";
         String checkPassword = "123456";
+        String planetCode = "1";
         //测试其中一个为空
-        long result = userService.userRegister(userAccount,userPassword,checkPassword);
+        long result = userService.userRegister(userAccount,userPassword,checkPassword,planetCode );
         Assertions.assertEquals(-1,result);
 
         //测试账户小于4
         userAccount = "yu";
-        result = userService.userRegister(userAccount,userPassword,checkPassword);
+        result = userService.userRegister(userAccount,userPassword,checkPassword, planetCode);
 
         //测试密码小于8
         userAccount = "yupi";
         userPassword = "123456";
-        result = userService.userRegister(userAccount,userPassword,checkPassword);
+        result = userService.userRegister(userAccount,userPassword,checkPassword, planetCode);
 
         //测试账户是否有特殊字符
         userAccount = "yu pi";
         userPassword = "12345678";
-        result =userService.userRegister(userAccount,userPassword,checkPassword);
+        result =userService.userRegister(userAccount,userPassword,checkPassword, planetCode);
 
         //测试密码和检验密码是否相同
         checkPassword = "123456789";
-        result =userService.userRegister(userAccount,userPassword,checkPassword);
+        result =userService.userRegister(userAccount,userPassword,checkPassword, planetCode);
 
         //判断是否已经存在该用户
         userAccount = "leo22";
         checkPassword = "12345678";
 
-        userAccount = "yupi2";
-        result =userService.userRegister(userAccount,userPassword,checkPassword);
+        userAccount = "yupi3";
+        result =userService.userRegister(userAccount,userPassword,checkPassword, planetCode);
 
         Assertions.assertTrue(result>0);
 

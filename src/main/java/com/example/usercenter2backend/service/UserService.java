@@ -17,9 +17,10 @@ public interface UserService extends IService<User> {
      * @param userAccount 用户账号
      * @param userPassword 用户密码
      * @param checkPassword 确认密码
+     * @param planetCode
      * @return 返回用户id
      */
-    long userRegister(String userAccount,String userPassword,String checkPassword);
+    long userRegister(String userAccount,String userPassword,String checkPassword,String planetCode);
 
     /**
      * 账号登录
@@ -36,4 +37,11 @@ public interface UserService extends IService<User> {
      * @return 返回脱敏后的用户信息
      */
     User getSafeUser(User user);
+
+    /**
+     * 注销登录
+     * @param request 移除session就默认未登录
+     * @return 返回一个状态码
+     */
+    int userLogout(HttpServletRequest request);
 }
