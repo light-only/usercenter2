@@ -20,7 +20,7 @@ public class ResultUtils {
      * @return
      */
     public static BaseResponse error(ErrorCode errorCode){
-        return new BaseResponse<>(errorCode);
+        return new BaseResponse(errorCode);
     }
 
     /**
@@ -31,7 +31,7 @@ public class ResultUtils {
      * @return
      */
     public static BaseResponse error(int code ,String message,String description){
-        return new BaseResponse<>(code,null,message,description);
+        return new BaseResponse(code,null,message,description);
     }
 
     /**
@@ -42,7 +42,7 @@ public class ResultUtils {
      * @return
      */
     public static BaseResponse error(ErrorCode errorCode,String message,String description){
-        return new BaseResponse<>(errorCode.getCode(),null,message,description);
+        return new BaseResponse(errorCode.getCode(),null,message,description);
     }
 
     /**
@@ -52,6 +52,6 @@ public class ResultUtils {
      * @return
      */
     public static BaseResponse error(ErrorCode errorCode, String description){
-        return new BaseResponse<>(errorCode.getCode(),null,errorCode.getMessage(),description);
+        return new BaseResponse(errorCode.getCode(),null,errorCode.getMessage(),description);
     }
 }

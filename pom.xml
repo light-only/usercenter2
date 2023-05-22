@@ -101,7 +101,6 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.example.usercenter2backend.Usercenter2BackendApplication</mainClass>
-                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>
