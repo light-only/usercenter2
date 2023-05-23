@@ -25,6 +25,7 @@ mybatis-plus:
   #配置禁止默认驼峰转换下划线
   configuration:
     map-underscore-to-camel-case: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 
 ##下面这些内容是为了让MyBatis映射

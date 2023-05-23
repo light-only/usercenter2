@@ -1,6 +1,7 @@
 package com.example.usercenter2backend.service;
 
 import com.example.usercenter2backend.model.domain.User;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
@@ -8,6 +9,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 用户服务测试
@@ -74,5 +78,12 @@ public class UserServiceTest {
 
         Assertions.assertTrue(result>0);
 
+    }
+
+    @Test
+    public void testGetUserByTags() {
+        List<String> tagNameList = Arrays.asList("java");
+        List<User> userList = userService.getUserByTags(tagNameList);
+        Assert.assertNotNull(userList);
     }
 }

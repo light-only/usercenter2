@@ -7,15 +7,23 @@ import com.example.usercenter2backend.exception.BusinessException;
 import com.example.usercenter2backend.mapper.UserMapper;
 import com.example.usercenter2backend.model.domain.User;
 import com.example.usercenter2backend.service.UserService;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.example.usercenter2backend.constant.UserConstant.USER_LOGIN_STATE;
 
@@ -164,6 +172,66 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public int userLogout(HttpServletRequest request) {
         request.getSession().removeAttribute(USER_LOGIN_STATE);
         return 1;
+    }
+
+    /**
+     * 根据标签查询用户（内存版本）
+     * @param tagNameList 标签列表
+     * @return
+     */
+    @Override
+    public List<User> getUserByTags(List<String> tagNameList) {
+        if(CollectionUtils.isEmpty(tagNameList)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        //QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        //for (String tagName:tagNameList){
+        //    queryWrapper = queryWrapper.like("tags",tagName);
+        //}
+        //List<User> userList = userMapper.selectList(queryWrapper);
+        //return userList.stream().map(this::getSafeUser).collect(Collectors.toList());
+
+        //1.先查询所有的用户
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        List<User> userList = userMapper.selectList(queryWrapper);
+        Gson gson = new Gson();
+        //2.在内存中查询是否有符合条件的标签
+        return userList.stream().filter(user->{
+            String tagStr = user.getTags();
+            if(StringUtils.isBlank(tagStr)){
+                return false;
+            }
+            /**
+             * new TypeToken<Set<String>>(){}.getType()用于获取一个Type对象，表示Set<String>类型。
+             * 然后，gson.fromJson方法将tagStr字符串解析成一个Set<String>类型的对象tempTagNameSet。
+             */
+            Set<String> tempTagNameSet = gson.fromJson(tagStr,new TypeToken<Set<String>>(){}.getType());
+            tempTagNameSet = Optional.ofNullable(tempTagNameSet).orElse(new HashSet<>());
+            for(String tagName:tagNameList){
+                if(!tempTagNameSet.contains(tagName)){
+                    return false;
+                }
+            }
+            return true;
+        }).map(this::getSafeUser).collect(Collectors.toList());
+    }
+
+    /**
+     * 根据标签查询用户（SQL版本）
+     * @param tagNameList
+     * @return
+     */
+    @Deprecated
+    private List<User> searchUserByTags(List<String> tagNameList) {
+        if(CollectionUtils.isEmpty(tagNameList)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        for (String tagName:tagNameList){
+            queryWrapper = queryWrapper.like("tags",tagName);
+        }
+        List<User> userList = userMapper.selectList(queryWrapper);
+        return userList.stream().map(this::getSafeUser).collect(Collectors.toList());
     }
 }
 

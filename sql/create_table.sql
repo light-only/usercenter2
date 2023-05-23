@@ -20,3 +20,22 @@ create table if not exists leo2.user
     )
     comment '用户表';
 
+
+create table if not exists leo2.tag
+(
+    id bigint auto_increment comment 'id'
+    primary key,
+    tag_name varchar(256) null comment '标签名',
+    user_id bigint null comment '用户 id',
+    parent_id bigint null comment '父标签 id',
+    is_parent tinyint null comment '是否为父标签 0-否 1-是',
+    gmt_create datetime default CURRENT_TIMESTAMP null comment '创建时间',
+    gmt_modified datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '修改时间',
+    is_deleted tinyint default 0 null comment '逻辑删除',
+    constraint uniIdx_tageName
+    unique (tag_name)
+    )
+    comment '标签';
+
+create index idx_userId
+	on leo2.tag (user_id);
