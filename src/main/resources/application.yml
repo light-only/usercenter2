@@ -1,6 +1,14 @@
 # DataSource Config
 spring:
   name: usercenter2Backend
+
+  #接口文档配置
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  #接口文档配置
+  profiles:
+    active: dev
   # 数据库地址
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
