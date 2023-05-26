@@ -184,13 +184,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if(CollectionUtils.isEmpty(tagNameList)){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        //QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        //for (String tagName:tagNameList){
-        //    queryWrapper = queryWrapper.like("tags",tagName);
-        //}
-        //List<User> userList = userMapper.selectList(queryWrapper);
-        //return userList.stream().map(this::getSafeUser).collect(Collectors.toList());
-
         //1.先查询所有的用户
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         List<User> userList = userMapper.selectList(queryWrapper);
@@ -206,6 +199,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
              * 然后，gson.fromJson方法将tagStr字符串解析成一个Set<String>类型的对象tempTagNameSet。
              */
             Set<String> tempTagNameSet = gson.fromJson(tagStr,new TypeToken<Set<String>>(){}.getType());
+            //判断是否为空
             tempTagNameSet = Optional.ofNullable(tempTagNameSet).orElse(new HashSet<>());
             for(String tagName:tagNameList){
                 if(!tempTagNameSet.contains(tagName)){

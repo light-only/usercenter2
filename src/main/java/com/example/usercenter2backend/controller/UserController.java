@@ -10,11 +10,11 @@ import com.example.usercenter2backend.model.domain.request.UserLoginRequest;
 import com.example.usercenter2backend.model.domain.request.UserRegisterRequest;
 import com.example.usercenter2backend.service.UserService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +27,7 @@ import static com.example.usercenter2backend.constant.UserConstant.USER_LOGIN_ST
  */
 @RestController
 @RequestMapping("/user")
+@CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
     @Resource
     private UserService userService;
@@ -116,6 +117,15 @@ public class UserController {
         }
         int result = userService.userLogout(request);
         return ResultUtils.success(result);
+    }
+
+    @GetMapping("/search/tags")
+    public BaseResponse<List<User>> searchUserByTags(@RequestParam(required = false) List<String> tagNameList){
+        if(CollectionUtils.isEmpty(tagNameList)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        List<User> userList = userService.getUserByTags(tagNameList);
+        return ResultUtils.success(userList);
     }
 
     /**
