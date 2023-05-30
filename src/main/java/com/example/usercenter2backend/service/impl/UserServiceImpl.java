@@ -25,6 +25,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.example.usercenter2backend.constant.UserConstant.ADMIN_ROLE;
 import static com.example.usercenter2backend.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
@@ -208,6 +209,50 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             }
             return true;
         }).map(this::getSafeUser).collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean isAdmin(HttpServletRequest request) {
+        Object userObject = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User user = (User) userObject;
+        return user != null && user.getUserRole() == ADMIN_ROLE;
+    }
+
+    @Override
+    public boolean isAdmin(User loginUser) {
+        return loginUser.getUserRole() == ADMIN_ROLE;
+    }
+
+    @Override
+    public User getCurrentUser(HttpServletRequest request) {
+        if(request == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User user = (User) request.getSession().getAttribute(USER_LOGIN_STATE);
+        if(user == null){
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        return user;
+    }
+
+    @Override
+    public int updateUser(User user, User loginUser) {
+        long userId = user.getId();
+        if(userId <= 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        //校验信息：
+        //1.管理员可以修改任何人的信息
+        //2.普通用户只能修改自己的信息
+        if(!isAdmin(loginUser) && userId != loginUser.getId()){
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        User oldUser = this.getById(user.getId());
+        if(oldUser == null){
+            throw new BusinessException(ErrorCode.NULL_ERROR);
+        }
+        //触发更新
+        return this.baseMapper.updateById(user);
     }
 
     /**

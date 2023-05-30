@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.example.usercenter2backend.constant.UserConstant.ADMIN_ROLE;
 import static com.example.usercenter2backend.constant.UserConstant.USER_LOGIN_STATE;
 
 
@@ -27,7 +26,7 @@ import static com.example.usercenter2backend.constant.UserConstant.USER_LOGIN_ST
  */
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000",allowCredentials = "true")
 public class UserController {
     @Resource
     private UserService userService;
@@ -71,7 +70,7 @@ public class UserController {
     public BaseResponse<List<User>> userSearch( String userName,HttpServletRequest request){
         //这个地方基本上没有业务逻辑校验，所以直接在这写。
         //判断是否是管理员
-        if(!isAdmin(request)){
+        if(!userService.isAdmin(request)){
             //return new ArrayList<>();
             throw new BusinessException(ErrorCode.NO_AUTH);
         }
@@ -84,10 +83,19 @@ public class UserController {
         List<User> list = userList.stream().map(user-> userService.getSafeUser(user)).collect(Collectors.toList());
         return ResultUtils.success(list);
     }
+    @PostMapping("/update")
+    public BaseResponse<Integer> updateUser(@RequestBody User user ,HttpServletRequest request){
+        if(user == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getCurrentUser(request);
+        int result = userService.updateUser(user,loginUser);
+        return ResultUtils.success(result);
+    }
     @PostMapping("/delete")
     public BaseResponse<Boolean> deleteUser(long id,HttpServletRequest request){
         //判断是否是管理员
-        if(!isAdmin(request)){
+        if(!userService.isAdmin(request)){
             throw new BusinessException(ErrorCode.NO_AUTH);
         }
         if(id <= 0){
@@ -128,15 +136,5 @@ public class UserController {
         return ResultUtils.success(userList);
     }
 
-    /**
-     * 判断是否是管理员账号
-     * @param request
-     * @return
-     */
-    public boolean isAdmin(HttpServletRequest request) {
-        Object userObject = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) userObject;
-        return user != null && user.getUserRole() == ADMIN_ROLE;
-    }
 
 }
