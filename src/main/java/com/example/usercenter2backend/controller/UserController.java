@@ -1,21 +1,27 @@
 package com.example.usercenter2backend.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.usercenter2backend.common.BaseResponse;
 import com.example.usercenter2backend.common.ErrorCode;
 import com.example.usercenter2backend.common.ResultUtils;
+import com.example.usercenter2backend.config.RedisTemplateConfig;
 import com.example.usercenter2backend.exception.BusinessException;
 import com.example.usercenter2backend.model.domain.User;
 import com.example.usercenter2backend.model.domain.request.UserLoginRequest;
 import com.example.usercenter2backend.model.domain.request.UserRegisterRequest;
 import com.example.usercenter2backend.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.example.usercenter2backend.constant.UserConstant.USER_LOGIN_STATE;
@@ -24,13 +30,15 @@ import static com.example.usercenter2backend.constant.UserConstant.USER_LOGIN_ST
 /**
  * 用户接口
  */
+@Slf4j
 @RestController
 @RequestMapping("/user")
 @CrossOrigin(origins = "http://localhost:3000",allowCredentials = "true")
 public class UserController {
     @Resource
     private UserService userService;
-
+    @Resource
+    private RedisTemplate redisTemplate;
     @PostMapping("/register")
     public BaseResponse<Long> doRegister(@RequestBody UserRegisterRequest userRegisterRequest){
         //这里的处理仅仅是对参数的校验，没有业务的处理
@@ -82,6 +90,28 @@ public class UserController {
         //遍历获取的用户，并进行脱敏后的数据。
         List<User> list = userList.stream().map(user-> userService.getSafeUser(user)).collect(Collectors.toList());
         return ResultUtils.success(list);
+    }
+    @GetMapping("/recommend")
+    public BaseResponse<Page<User>> getRecommendUser(long pageSize,long pageNum,HttpServletRequest request){
+        User loginUser = userService.getCurrentUser(request);
+        String redisKey = String.format("leo:user:recommend:%s",loginUser.getId());
+        ValueOperations<String,Object> valueOperations = redisTemplate.opsForValue();
+        //如果有缓存，直接读取缓存
+        Page<User> userPage = (Page<User>) valueOperations.get(redisKey);
+        if(userPage != null){
+            return ResultUtils.success(userPage);
+        }
+        //没有缓存的话，再去数据库中查询
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        userPage = userService.page(new Page<>(pageNum,pageSize),queryWrapper);
+
+        //查找数据库，之后写入redis缓存中
+        try {
+            valueOperations.set(redisKey,userPage,30000, TimeUnit.MILLISECONDS);
+        }catch (Exception e){
+            log.error("redis set key error",e);
+        }
+        return ResultUtils.success(userPage);
     }
     @PostMapping("/update")
     public BaseResponse<Integer> updateUser(@RequestBody User user ,HttpServletRequest request){
