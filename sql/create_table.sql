@@ -39,3 +39,36 @@ create table if not exists leo2.tag
 
 create index idx_userId
 	on leo2.tag (user_id);
+
+
+create table if not exists leo2.team
+(
+    id bigint auto_increment
+    primary key,
+    name varchar(256) not null comment '队伍名称',
+    description varchar(1024) null comment '队伍描述',
+    maxNum int not null comment '最大人数',
+    expireTime datetime null comment '过期时间',
+    userId bigint null comment '用户id',
+    status int default 0 not null comment '0 - 公开，1-加密，2-私有。',
+    password varchar(512) null comment '密码',
+    createTime datetime default CURRENT_TIMESTAMP null comment '创建时间',
+    updateTime datetime default CURRENT_TIMESTAMP null comment '更新时间',
+    isDelete tinyint default 0 not null comment '是否删除，逻辑删除，0 -不删除，1-删除'
+    )
+    comment '队伍表';
+
+create table if not exists leo2.user_team
+(
+    id bigint auto_increment
+    primary key,
+    userId bigint not null comment '用户id',
+    teamId bigint null comment '队伍id',
+    joinTime datetime default CURRENT_TIMESTAMP null comment '加入时间',
+    createTime datetime default CURRENT_TIMESTAMP null comment '创建时间',
+    updateTime datetime default CURRENT_TIMESTAMP null comment '更新时间',
+    isDelete tinyint default 0 not null comment '逻辑删除，0-不删除，1-删除'
+)
+    comment '用户队伍表';
+
+
