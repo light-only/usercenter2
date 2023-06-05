@@ -1,7 +1,10 @@
 package com.example.usercenter2backend.common;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
+@Data
 public class PageRequest implements Serializable {
 
     private static final long serialVersionUID = 6270734210699667449L;

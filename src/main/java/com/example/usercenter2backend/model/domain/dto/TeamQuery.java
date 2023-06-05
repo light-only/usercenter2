@@ -42,4 +42,9 @@ public class TeamQuery extends PageRequest {
      */
     private Integer status;
 
+    /**
+     * 搜索关键字
+     */
+    private String searchText;
+
 }
