@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.usercenter2backend.model.domain.Team;
 import com.example.usercenter2backend.model.domain.User;
 import com.example.usercenter2backend.model.domain.dto.TeamQuery;
+import com.example.usercenter2backend.model.domain.request.TeamUpdateRequest;
 import com.example.usercenter2backend.model.domain.vo.TeamUserVO;
 
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.List;
 public interface TeamService extends IService<Team> {
 
     /**
-     * 新增队伍
+     * @description:新增队伍
      * @param team 队伍
      * @param loginUser 当前登录用户
      * @return
@@ -25,12 +26,18 @@ public interface TeamService extends IService<Team> {
     long addTeam(Team team, User loginUser);
 
     /**
-     * 获取队伍列表
+     * @description:获取队伍列表
      * @param teamQuery
      * @param isAdmin
      * @return
      */
     List<TeamUserVO> getTeamList(TeamQuery teamQuery,boolean isAdmin);
 
-
+    /**
+     * @description:更新队伍信息
+     * @param teamUpdateRequest 请求体
+     * @param loginUser 当前登录用户
+     * @return
+     */
+    boolean updateTeam(TeamUpdateRequest teamUpdateRequest, User loginUser);
 }

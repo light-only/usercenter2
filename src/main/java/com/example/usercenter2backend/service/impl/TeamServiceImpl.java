@@ -11,6 +11,7 @@ import com.example.usercenter2backend.model.domain.Team;
 import com.example.usercenter2backend.model.domain.User;
 import com.example.usercenter2backend.model.domain.UserTeam;
 import com.example.usercenter2backend.model.domain.dto.TeamQuery;
+import com.example.usercenter2backend.model.domain.request.TeamUpdateRequest;
 import com.example.usercenter2backend.model.domain.vo.TeamUserVO;
 import com.example.usercenter2backend.model.domain.vo.UserVO;
 import com.example.usercenter2backend.service.TeamService;
@@ -125,10 +126,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
         if(teamQuery != null){
             Long id = teamQuery.getId();
-            if(id>0 && id!=null){
+            if( id!=null && id>0 ){
                 queryWrapper.eq("id",id);
             }
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         String searchText = teamQuery.getSearchText();
         if(StringUtils.isNotBlank(searchText)){
@@ -144,7 +144,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         }
         Integer maxNum = teamQuery.getMaxNum();
         //查询最大人数相等
-        if(maxNum != null & maxNum>0){
+        if(maxNum != null && maxNum>0){
             queryWrapper.eq("maxNum",maxNum);
         }
         Long userId = teamQuery.getUserId();
@@ -158,7 +158,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         if(statusEnum == null){
             statusEnum = TeamStatusEnum.PUBLIC;
         }
-        if(!isAdmin && status.equals(TeamStatusEnum.PUBLIC)){
+        if(!isAdmin && !statusEnum.equals(TeamStatusEnum.PUBLIC)){
             throw new BusinessException(ErrorCode.NO_AUTH);
         }
         queryWrapper.eq("status",statusEnum.getValue());
@@ -188,6 +188,11 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             teamUserVOList.add(teamUserVO);
         }
         return teamUserVOList;
+    }
+
+    @Override
+    public boolean updateTeam(TeamUpdateRequest teamUpdateRequest, User loginUser) {
+        return true;
     }
 }
 

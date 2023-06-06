@@ -2,15 +2,10 @@ package com.example.usercenter2backend.model.domain.dto;
 
 import com.example.usercenter2backend.common.PageRequest;
 import lombok.Data;
-import org.springframework.transaction.annotation.Transactional;
+import lombok.EqualsAndHashCode;
 
 
-/**
- * @Transactional(rollbackFor  = Exception.class)
- * 要么数据操作都成功，要么都失败
- */
-
-@Transactional(rollbackFor  = Exception.class)
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class TeamQuery extends PageRequest {
 
