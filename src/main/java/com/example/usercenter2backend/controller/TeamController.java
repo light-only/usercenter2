@@ -11,6 +11,7 @@ import com.example.usercenter2backend.model.domain.Team;
 import com.example.usercenter2backend.model.domain.User;
 import com.example.usercenter2backend.model.domain.dto.TeamQuery;
 import com.example.usercenter2backend.model.domain.request.TeamAddRequest;
+import com.example.usercenter2backend.model.domain.request.TeamJoinRequest;
 import com.example.usercenter2backend.model.domain.request.TeamUpdateRequest;
 import com.example.usercenter2backend.model.domain.vo.TeamUserVO;
 import com.example.usercenter2backend.service.TeamService;
@@ -106,6 +107,16 @@ public class TeamController {
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>(team);
         Page<Team> teamPage = teamService.page(page,queryWrapper);
         return ResultUtils.success(teamPage);
+    }
+
+    @PostMapping("/join")
+    public BaseResponse<Boolean> joinTeam(TeamJoinRequest teamJoinRequest,HttpServletRequest request){
+        if(teamJoinRequest == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getCurrentUser(request);
+        boolean result = teamService.joinTeam(teamJoinRequest,loginUser);
+        return ResultUtils.success(result);
     }
 
 }

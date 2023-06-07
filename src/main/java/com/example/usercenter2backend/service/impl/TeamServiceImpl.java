@@ -11,15 +11,14 @@ import com.example.usercenter2backend.model.domain.Team;
 import com.example.usercenter2backend.model.domain.User;
 import com.example.usercenter2backend.model.domain.UserTeam;
 import com.example.usercenter2backend.model.domain.dto.TeamQuery;
+import com.example.usercenter2backend.model.domain.request.TeamJoinRequest;
 import com.example.usercenter2backend.model.domain.request.TeamUpdateRequest;
 import com.example.usercenter2backend.model.domain.vo.TeamUserVO;
 import com.example.usercenter2backend.model.domain.vo.UserVO;
 import com.example.usercenter2backend.service.TeamService;
 import com.example.usercenter2backend.service.UserService;
 import com.example.usercenter2backend.service.UserTeamService;
-import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -192,7 +191,38 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
     @Override
     public boolean updateTeam(TeamUpdateRequest teamUpdateRequest, User loginUser) {
-        return true;
+        if(teamUpdateRequest == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long id = teamUpdateRequest.getId();
+        if(id ==null || id<0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Team oldTeam = this.getById(id);
+        if(oldTeam == null){
+            throw new BusinessException(ErrorCode.NULL_ERROR,"队伍不存在");
+        }
+        //检验只有管理员或者是队伍创建者才能修改
+        Long createUserId = oldTeam.getUserId();
+        if(!createUserId.equals(loginUser.getId()) && !userService.isAdmin(loginUser)){
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        //如果队伍状态改为加密，必须要有密码
+        TeamStatusEnum statusEnum = TeamStatusEnum.getEnumByValue(teamUpdateRequest.getStatus());
+        if(statusEnum.equals(TeamStatusEnum.SECRET)){
+            if(StringUtils.isBlank(teamUpdateRequest.getPassword())) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "加密队伍密码不能为空");
+            }
+        }
+        Team updateTeam = new Team();
+        BeanUtils.copyProperties(teamUpdateRequest,updateTeam);
+        return this.updateById(updateTeam);
+    }
+
+    @Override
+    public boolean joinTeam(TeamJoinRequest teamJoinRequest, User loginUser) {
+        //todo:待完善
+        return false;
     }
 }
 
