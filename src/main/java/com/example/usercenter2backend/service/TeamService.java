@@ -5,9 +5,11 @@ import com.example.usercenter2backend.model.domain.Team;
 import com.example.usercenter2backend.model.domain.User;
 import com.example.usercenter2backend.model.domain.dto.TeamQuery;
 import com.example.usercenter2backend.model.domain.request.TeamJoinRequest;
+import com.example.usercenter2backend.model.domain.request.TeamQuitRequest;
 import com.example.usercenter2backend.model.domain.request.TeamUpdateRequest;
 import com.example.usercenter2backend.model.domain.vo.TeamUserVO;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 
@@ -49,4 +51,20 @@ public interface TeamService extends IService<Team> {
      * @return
      */
     boolean joinTeam(TeamJoinRequest teamJoinRequest,User loginUser);
+
+    /**
+     * @description:退出队伍
+     * @param teamQuitRequest 退出请求体
+     * @param loginUser 当前登录用户
+     * @return
+     */
+    boolean quitTeams(TeamQuitRequest teamQuitRequest,User loginUser);
+
+    /**
+     * @description:删除队伍
+     * @param id 队伍id
+     * @param loginUser 当前登录用户
+     * @return
+     */
+    boolean deleteTeams(Long id , User loginUser);
 }
