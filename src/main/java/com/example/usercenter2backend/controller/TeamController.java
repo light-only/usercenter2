@@ -110,7 +110,7 @@ public class TeamController {
     }
 
     @PostMapping("/join")
-    public BaseResponse<Boolean> joinTeam(TeamJoinRequest teamJoinRequest,HttpServletRequest request){
+    public BaseResponse<Boolean> joinTeam(@RequestBody TeamJoinRequest teamJoinRequest,HttpServletRequest request){
         if(teamJoinRequest == null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
