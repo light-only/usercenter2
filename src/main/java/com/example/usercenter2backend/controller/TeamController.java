@@ -12,6 +12,7 @@ import com.example.usercenter2backend.model.domain.User;
 import com.example.usercenter2backend.model.domain.dto.TeamQuery;
 import com.example.usercenter2backend.model.domain.request.TeamAddRequest;
 import com.example.usercenter2backend.model.domain.request.TeamJoinRequest;
+import com.example.usercenter2backend.model.domain.request.TeamQuitRequest;
 import com.example.usercenter2backend.model.domain.request.TeamUpdateRequest;
 import com.example.usercenter2backend.model.domain.vo.TeamUserVO;
 import com.example.usercenter2backend.service.TeamService;
@@ -50,18 +51,6 @@ public class TeamController {
         BeanUtils.copyProperties(teamAddRequest,team);
         Long teamId = teamService.addTeam(team,loginUser);
         return ResultUtils.success(teamId);
-    }
-
-    @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteTeam(@RequestBody Long id){
-        if(id <= 0){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        boolean result = teamService.removeById(id);
-        if(!result){
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"删除失败");
-        }
-        return ResultUtils.success(true);
     }
     @PostMapping("/update")
     public BaseResponse<Boolean> updateTeam(@RequestBody TeamUpdateRequest teamUpdateRequest,HttpServletRequest request){
@@ -116,6 +105,25 @@ public class TeamController {
         }
         User loginUser = userService.getCurrentUser(request);
         boolean result = teamService.joinTeam(teamJoinRequest,loginUser);
+        return ResultUtils.success(result);
+    }
+
+    @PostMapping("/quit")
+    public BaseResponse<Boolean> quitTeam(TeamQuitRequest teamQuitRequest,HttpServletRequest request){
+        if(teamQuitRequest == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getCurrentUser(request);
+        boolean result = teamService.quitTeams(teamQuitRequest,loginUser);
+        return ResultUtils.success(result);
+    }
+    @PostMapping("/delete")
+    public BaseResponse<Boolean> deleteTeam(@RequestBody long id ,HttpServletRequest request){
+        if(id <=  0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getCurrentUser(request);
+        boolean result = teamService.deleteTeams(id,loginUser);
         return ResultUtils.success(result);
     }
 
