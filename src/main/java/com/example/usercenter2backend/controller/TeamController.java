@@ -9,21 +9,24 @@ import com.example.usercenter2backend.exception.BusinessException;
 import com.example.usercenter2backend.model.domain.Team;
 
 import com.example.usercenter2backend.model.domain.User;
+import com.example.usercenter2backend.model.domain.UserTeam;
 import com.example.usercenter2backend.model.domain.dto.TeamQuery;
-import com.example.usercenter2backend.model.domain.request.TeamAddRequest;
-import com.example.usercenter2backend.model.domain.request.TeamJoinRequest;
-import com.example.usercenter2backend.model.domain.request.TeamQuitRequest;
-import com.example.usercenter2backend.model.domain.request.TeamUpdateRequest;
+import com.example.usercenter2backend.model.domain.request.*;
 import com.example.usercenter2backend.model.domain.vo.TeamUserVO;
 import com.example.usercenter2backend.service.TeamService;
 import com.example.usercenter2backend.service.UserService;
+import com.example.usercenter2backend.service.UserTeamService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 /**
@@ -40,6 +43,9 @@ public class TeamController {
 
     @Resource
     private TeamService teamService;
+
+    @Resource
+    private UserTeamService userTeamService;
 
     @PostMapping("/add")
     public BaseResponse<Long> addTeam(@RequestBody TeamAddRequest teamAddRequest, HttpServletRequest request){
@@ -118,13 +124,42 @@ public class TeamController {
         return ResultUtils.success(result);
     }
     @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteTeam(@RequestBody long id ,HttpServletRequest request){
-        if(id <=  0){
+    public BaseResponse<Boolean> deleteTeam(DeleteRequest deleteRequest, HttpServletRequest request){
+        if(deleteRequest ==  null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getCurrentUser(request);
-        boolean result = teamService.deleteTeams(id,loginUser);
+        boolean result = teamService.deleteTeams(deleteRequest.getId(),loginUser);
         return ResultUtils.success(result);
+    }
+    @GetMapping("list/my/create")
+    public BaseResponse<List<TeamUserVO>> listMyCreateTeams(TeamQuery teamQuery,HttpServletRequest request){
+        if(teamQuery == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getCurrentUser(request);
+        boolean isTrue = userService.isAdmin(request);
+        teamQuery.setUserId(loginUser.getId());
+        List<TeamUserVO> teamList = teamService.getTeamList(teamQuery,isTrue);
+        return ResultUtils.success(teamList);
+    }
+
+    @GetMapping("list/my/join")
+    public BaseResponse<List<TeamUserVO>> listMyJoinTeam(TeamQuery teamQuery,HttpServletRequest request){
+        if(teamQuery == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getCurrentUser(request);
+        boolean isTrue = userService.isAdmin(request);
+        QueryWrapper<UserTeam> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userId",loginUser.getId());
+        List<UserTeam> userTeamList = userTeamService.list(queryWrapper);
+        //取出不重复的队伍id
+        Map<Long,List<UserTeam>> listMap = userTeamList.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
+        List<Long> idList = new ArrayList<>(listMap.keySet());
+        teamQuery.setIdList(idList);
+        List<TeamUserVO> teamList = teamService.getTeamList(teamQuery,isTrue);
+        return ResultUtils.success(teamList);
     }
 
 }

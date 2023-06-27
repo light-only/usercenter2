@@ -11,6 +11,7 @@ import com.example.usercenter2backend.model.domain.Team;
 import com.example.usercenter2backend.model.domain.User;
 import com.example.usercenter2backend.model.domain.UserTeam;
 import com.example.usercenter2backend.model.domain.dto.TeamQuery;
+import com.example.usercenter2backend.model.domain.request.DeleteRequest;
 import com.example.usercenter2backend.model.domain.request.TeamJoinRequest;
 import com.example.usercenter2backend.model.domain.request.TeamQuitRequest;
 import com.example.usercenter2backend.model.domain.request.TeamUpdateRequest;
@@ -129,6 +130,11 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             if( id!=null && id>0 ){
                 queryWrapper.eq("id",id);
             }
+        }
+        List<Long> idList = teamQuery.getIdList();
+        //如果idList不为空，就在Team表中查找所有的所有idList里面的teamId数据。
+        if(!CollectionUtils.isEmpty(idList)){
+            queryWrapper.in("id",idList);
         }
         String searchText = teamQuery.getSearchText();
         if(StringUtils.isNotBlank(searchText)){
@@ -338,8 +344,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteTeams(Long id, User loginUser) {
-       Team team = this.getById(id);
-       long teamId = team.getId();
+        //this表示的是调用这个方法的对象，也就是teamService这个队伍的数据库实例。
+        Team team = this.getById(id);
+        long teamId = team.getId();
        //校验你是不是队伍的队长
         if(!team.getUserId().equals(loginUser.getId())){
             throw new BusinessException(ErrorCode.NO_AUTH,"无访问权限");

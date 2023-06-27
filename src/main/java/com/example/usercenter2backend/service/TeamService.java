@@ -67,4 +67,5 @@ public interface TeamService extends IService<Team> {
      * @return
      */
     boolean deleteTeams(Long id , User loginUser);
+
 }
