@@ -81,4 +81,12 @@ public interface UserService extends IService<User> {
      * @return
      */
     int updateUser(User user,User loginUser);
+
+    /**
+     * @param num
+     * @param loginUser
+     * @return
+     * @description:匹配用户
+     */
+    List<User> matchUsers(long num, User loginUser);
 }

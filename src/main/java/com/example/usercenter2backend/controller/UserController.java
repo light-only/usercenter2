@@ -166,5 +166,14 @@ public class UserController {
         return ResultUtils.success(userList);
     }
 
+    @GetMapping("/matchUser")
+    public BaseResponse<List<User>> matchUser(long num ,HttpServletRequest request){
+        if (num <= 0 || num > 20) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User user = userService.getCurrentUser(request);
+        return ResultUtils.success(userService.matchUsers(num, user));
+    }
+
 
 }
