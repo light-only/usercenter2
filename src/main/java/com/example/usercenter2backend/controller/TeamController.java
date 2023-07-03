@@ -22,10 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -89,6 +86,23 @@ public class TeamController {
         }
         boolean isAdmin = userService.isAdmin(request);
         List<TeamUserVO> teamList = teamService.getTeamList(teamQuery,isAdmin);
+        final List<Long> teamIdList = teamList.stream().map(TeamUserVO::getId).collect(Collectors.toList());
+        //判断用户是否已加入队伍
+        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
+        try{
+            User loginUser = userService.getCurrentUser(request);
+            //查询当前的用户id
+            userTeamQueryWrapper.eq("userId",loginUser.getId());
+            //查询teamId
+            userTeamQueryWrapper.in("teamId",teamIdList);
+            List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
+            //已加入队伍的id集合
+            Set<Long> hasJoinTeamSet = userTeamList.stream().map(UserTeam::getTeamId).collect(Collectors.toSet());
+            teamList.forEach(team->{
+                boolean hasJoin = hasJoinTeamSet.contains(team.getId());
+                team.setHasJoin(hasJoin);
+            });
+        }catch (Exception e){}
         return ResultUtils.success(teamList);
     }
     @GetMapping("/list/page")

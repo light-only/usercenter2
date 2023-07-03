@@ -259,7 +259,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public List<User> matchUsers(long num, User loginUser) {
 
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.in("id","tags");
+        queryWrapper.select("id","tags");
         queryWrapper.isNotNull("tags");
         List<User> userList = this.list(queryWrapper);
         String tags = loginUser.getTags();
@@ -272,7 +272,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             User user = userList.get(i);
             String userTags = user.getTags();
             //无标签或者当前用户自己
-            if(StringUtils.isBlank(userTags) || user.getId() == loginUser.getId()){
+            if(StringUtils.isBlank(userTags) || user.getId().equals(loginUser.getId())){
                 continue;
             }
             List<String > usersTagList = gson.fromJson(userTags,new TypeToken<List<String>>(){}.getType());
