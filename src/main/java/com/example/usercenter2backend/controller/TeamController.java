@@ -103,6 +103,14 @@ public class TeamController {
                 team.setHasJoin(hasJoin);
             });
         }catch (Exception e){}
+        if(teamIdList != null && !teamIdList.isEmpty()){
+            QueryWrapper<UserTeam> queryWrapper = new QueryWrapper<>();
+            queryWrapper.in("teamId",teamIdList);
+            List<UserTeam> userTeamList = userTeamService.list(queryWrapper);
+            //队伍id->加入这个队伍的用户列表
+            Map<Long,List<UserTeam>> teamIdUserTeamList = userTeamList.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
+            teamList.forEach(team->team.setHasJoinNum(teamIdUserTeamList.getOrDefault(team.getId(),new ArrayList<>()).size()));
+        }
         return ResultUtils.success(teamList);
     }
     @GetMapping("/list/page")
@@ -138,7 +146,7 @@ public class TeamController {
         return ResultUtils.success(result);
     }
     @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteTeam(DeleteRequest deleteRequest, HttpServletRequest request){
+    public BaseResponse<Boolean> deleteTeam( DeleteRequest deleteRequest, HttpServletRequest request){
         if(deleteRequest ==  null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
